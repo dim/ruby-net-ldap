@@ -6,13 +6,16 @@
 
 Pure Ruby LDAP library.
 
+A LDAP client library written in pure Ruby. 
+
 == FEATURES/PROBLEMS:
 
 The Lightweight Directory Access Protocol (LDAP) is an Internet protocol
 for accessing distributed directory services.
 
-Net::LDAP is an LDAP support library written in pure Ruby. It supports
-most LDAP client features and a subset of server features as well.
+Net::LDAP is a feature-complete LDAP support library written in pure Ruby.
+It supports most LDAP client features and a subset of server features as
+well.
 
 * Standards-based (going for RFC 4511)
 * Portable: 100% Ruby

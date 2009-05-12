@@ -1,4 +1,5 @@
-We're pleased to announce version 0.0.4 of Net::LDAP, the pure-Ruby LDAP library.
+We're pleased to announce version 0.0.5 of Net::LDAP, the pure-Ruby LDAP
+library.
 
 This version adds an implementation of Net::LDAP#bind_as, which allows
 you to authenticate users who log into your applications using simple

@@ -263,8 +263,7 @@ module Net
 
     class LdapError < StandardError; end
 
-    VERSION = "0.0.5"
-
+    VERSION = "0.0.5.rc1"
 
     SearchScope_BaseObject = 0
     SearchScope_SingleLevel = 1

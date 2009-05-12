@@ -25,13 +25,6 @@ test/test_password.rb
 test/test_snmp.rb
 test/testdata.ldif
 tests/NOTICE.txt
-tests/testber.rb
-tests/testdata.ldif
-tests/testem.rb
-tests/testfilter.rb
 tests/testldap.rb
-tests/testldif.rb
-tests/testpsw.rb
-tests/testsnmp.rb
 testserver/ldapserver.rb
 testserver/testdata.ldif

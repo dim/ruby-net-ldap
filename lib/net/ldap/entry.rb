@@ -24,15 +24,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #---------------------------------------------------------------------------
-#
-
 
 require 'base64'
 
-
-module Net
-class LDAP
-
+module Net; class LDAP
 
   # Objects of this class represent individual entries in an LDAP
   # directory. User code generally does not instantiate this class.
@@ -77,7 +72,6 @@ class LDAP
   # downcase, then take the symbol. Unfortunately we do this in
   # at least three places. Should do it in ONE place.
   class Entry
-
 
     # This constructor is not generally called by user code.
     #--
@@ -225,15 +219,13 @@ class LDAP
     #
     def method_missing *args, &block # :nodoc:
       s = args[0].to_s.downcase.intern
-      if attribute_names.include?(s)
-        self[s]
-      elsif s.to_s[-1] == 61 and s.to_s.length > 1
+      if s.to_s[-1] == 61 and s.to_s.length > 1
         value = args[1] or raise RuntimeError.new( "unable to set value" )
         value = [value] unless value.is_a?(Array)
         name = s.to_s[0..-2].intern
         self[name] = value
       else
-        raise NoMethodError.new( "undefined method '#{s}'" )
+        self[s]
       end
     end
 
@@ -261,7 +253,6 @@ class LDAP
     private :is_attribute_value_binary?
 
   end # class Entry
-
 
 end # class LDAP
 end # module Net
