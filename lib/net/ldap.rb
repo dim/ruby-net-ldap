@@ -47,13 +47,13 @@ module Net
   # while hiding the more arcane aspects
   # the LDAP protocol itself, and thus presenting as Ruby-like
   # a programming interface as possible.
-  # 
+  #
   # == Quick-start for the Impatient
   # === Quick Example of a user-authentication against an LDAP directory:
   #
   #  require 'rubygems'
   #  require 'net/ldap'
-  #  
+  #
   #  ldap = Net::LDAP.new
   #  ldap.host = your_server_ip_address
   #  ldap.port = 389
@@ -69,7 +69,7 @@ module Net
   #
   #  require 'rubygems'
   #  require 'net/ldap'
-  #  
+  #
   #  ldap = Net::LDAP.new :host => server_ip_address,
   #       :port => 389,
   #       :auth => {
@@ -80,7 +80,7 @@ module Net
   #
   #  filter = Net::LDAP::Filter.eq( "cn", "George*" )
   #  treebase = "dc=example,dc=com"
-  #  
+  #
   #  ldap.search( :base => treebase, :filter => filter ) do |entry|
   #    puts "DN: #{entry.dn}"
   #    entry.each do |attribute, values|
@@ -90,9 +90,9 @@ module Net
   #      end
   #    end
   #  end
-  #  
+  #
   #  p ldap.get_operation_result
-  #  
+  #
   #
   # == A Brief Introduction to LDAP
   #
@@ -115,7 +115,7 @@ module Net
   # but also very often about such items as printers, computers, and other
   # resources. To reflect this, LDAP uses the term <i>entity,</i> or less
   # commonly, <i>principal,</i> to denote its basic data-storage unit.
-  # 
+  #
   #
   # === Distinguished Names
   # In LDAP's view of the world,
@@ -196,7 +196,7 @@ module Net
   # filters can be joined together with AND, OR, and NOT operators.
   # A server will respond to a #search by returning a list of matching DNs together with a
   # set of attribute values for each entity, depending on what attributes the search requested.
-  # 
+  #
   # ==== Add
   # #add specifies a new DN and an initial set of attribute values. If the operation
   # succeeds, a new entity with the corresponding DN and attributes is added to the directory.
@@ -272,8 +272,8 @@ module Net
 
     AsnSyntax = BER.compile_syntax({
       :application => {
-	:primitive => {
-	  2 => :null		    # UnbindRequest body
+        :primitive => {
+          2 => :null                # UnbindRequest body
         },
         :constructed => {
           0 => :array,              # BindRequest
@@ -358,7 +358,7 @@ module Net
     #
     def LDAP::result2string code # :nodoc:
       ResultStrings[code] || "unknown result (#{code})"
-    end 
+    end
 
 
     attr_accessor :host, :port, :base
@@ -416,7 +416,7 @@ module Net
     # in your code or on command lines.
     #
     #  require 'net/ldap'
-    #  
+    #
     #  ldap = Net::LDAP.new
     #  ldap.host = server_ip_address
     #  ldap.authenticate "cn=Your Username,cn=Users,dc=example,dc=com", "your_psw"
@@ -424,7 +424,7 @@ module Net
     # Alternatively (with a password block):
     #
     #  require 'net/ldap'
-    #  
+    #
     #  ldap = Net::LDAP.new
     #  ldap.host = server_ip_address
     #  psw = proc { your_psw_function }
@@ -451,10 +451,10 @@ module Net
     #
     # The :simple_tls encryption method encrypts <i>all</i> communications with the LDAP
     # server.
-    # It completely establishes SSL/TLS encryption with the LDAP server 
+    # It completely establishes SSL/TLS encryption with the LDAP server
     # before any LDAP-protocol data is exchanged.
     # There is no plaintext negotiation and no special encryption-request controls
-    # are sent to the server. 
+    # are sent to the server.
     # <i>The :simple_tls option is the simplest, easiest way to encrypt communications
     # between Net::LDAP and LDAP servers.</i>
     # It's intended for cases where you have an implicit level of trust in the authenticity
@@ -477,7 +477,7 @@ module Net
     def encryption args
       case args
       when :simple_tls, :start_tls
-	      args = {:method => args}
+              args = {:method => args}
       end
       @encryption = args
     end
@@ -524,9 +524,9 @@ module Net
     def get_operation_result
       os = OpenStruct.new
       if @result.is_a?(Hash)
-	      os.code = (@result[:resultCode] || "").to_i
-	      os.error_message = @result[:errorMessage]
-	      os.matched_dn = @result[:matchedDN]
+              os.code = (@result[:resultCode] || "").to_i
+              os.error_message = @result[:errorMessage]
+              os.matched_dn = @result[:matchedDN]
       elsif @result
         os.code = @result
       else
@@ -788,14 +788,14 @@ module Net
     # Here's how you would use #bind_as to authenticate an email address and password:
     #
     #  require 'net/ldap'
-    #  
+    #
     #  user,psw = "joe_user@yourcompany.com", "joes_psw"
-    #  
+    #
     #  ldap = Net::LDAP.new
     #  ldap.host = "192.168.0.100"
     #  ldap.port = 389
     #  ldap.auth "cn=manager,dc=yourcompany,dc=com", "topsecret"
-    #  
+    #
     #  result = ldap.bind_as(
     #    :base => "dc=yourcompany,dc=com",
     #    :filter => "(mail=#{user})",
@@ -1095,51 +1095,51 @@ module Net
     end
 
 
-	# Return the root Subschema record from the LDAP server as a Net::LDAP::Entry,
-	# or an empty Entry if the server doesn't return the record. On success, the
-	# Net::LDAP::Entry returned from this call will have the attributes :dn,
-	# :objectclasses, and :attributetypes. If there is an error, call #get_operation_result
-	# for more information.
-	#  
-	#  ldap = Net::LDAP.new
-	#  ldap.host = "your.ldap.host"
-	#  ldap.auth "your-user-dn", "your-psw"
-	#  subschema_entry = ldap.search_subschema_entry
-	#  
-	#  subschema_entry.attributetypes.each do |attrtype|
-	#      # your code
-	#  end
-	#  
-	#  subschema_entry.objectclasses.each do |attrtype|
-	#      # your code
-	#  end
-	#--
-	# cf. RFC4512 section 4, particulary graff 4.4.
-	# The :dn attribute in the returned Entry is the subschema name as returned from
-	# the server.
-	# Set :ignore_server_caps, see the notes in search_root_dse.
-	#
-	def search_subschema_entry
-		rs = search(
-			    :ignore_server_caps=>true,
-			    :base=>"",
-			    :scope=>SearchScope_BaseObject,
-			    :attributes=>[:subschemaSubentry]
-		)
-		return Entry.new unless (rs and rs.first)
-		subschema_name = rs.first.subschemasubentry
-		return Entry.new unless (subschema_name and subschema_name.first)
+        # Return the root Subschema record from the LDAP server as a Net::LDAP::Entry,
+        # or an empty Entry if the server doesn't return the record. On success, the
+        # Net::LDAP::Entry returned from this call will have the attributes :dn,
+        # :objectclasses, and :attributetypes. If there is an error, call #get_operation_result
+        # for more information.
+        #
+        #  ldap = Net::LDAP.new
+        #  ldap.host = "your.ldap.host"
+        #  ldap.auth "your-user-dn", "your-psw"
+        #  subschema_entry = ldap.search_subschema_entry
+        #
+        #  subschema_entry.attributetypes.each do |attrtype|
+        #      # your code
+        #  end
+        #
+        #  subschema_entry.objectclasses.each do |attrtype|
+        #      # your code
+        #  end
+        #--
+        # cf. RFC4512 section 4, particulary graff 4.4.
+        # The :dn attribute in the returned Entry is the subschema name as returned from
+        # the server.
+        # Set :ignore_server_caps, see the notes in search_root_dse.
+        #
+        def search_subschema_entry
+                rs = search(
+                            :ignore_server_caps=>true,
+                            :base=>"",
+                            :scope=>SearchScope_BaseObject,
+                            :attributes=>[:subschemaSubentry]
+                )
+                return Entry.new unless (rs and rs.first)
+                subschema_name = rs.first.subschemasubentry
+                return Entry.new unless (subschema_name and subschema_name.first)
 
-		rs = search(
-			    :ignore_server_caps=>true,
-			    :base=>subschema_name.first,
-			    :scope=>SearchScope_BaseObject,
-			    :filter=>"objectclass=subschema",
-			    :attributes=>[:objectclasses, :attributetypes]
-		)
+                rs = search(
+                            :ignore_server_caps=>true,
+                            :base=>subschema_name.first,
+                            :scope=>SearchScope_BaseObject,
+                            :filter=>"objectclass=subschema",
+                            :attributes=>[:objectclasses, :attributetypes]
+                )
 
-		(rs and rs.first) or Entry.new
-	end
+                (rs and rs.first) or Entry.new
+        end
 
 
     #--
@@ -1217,24 +1217,24 @@ module Net
         @conn.connect
         @conn.sync_close = true
       # additional branches requiring server validation and peer certs, etc. go here.
-	when :start_tls
-		raise LdapError.new("openssl unavailable") unless $net_ldap_openssl_available
-		msgid = next_msgid.to_ber
-		request = [StartTlsOid.to_ber].to_ber_appsequence( Net::LdapPdu::ExtendedRequest )
-		request_pkt = [msgid, request].to_ber_sequence
-		@conn.write request_pkt
-		be = @conn.read_ber(AsnSyntax)
-		raise LdapError.new("no start_tls result") if be.nil?
-		pdu = Net::LdapPdu.new(be)
-		raise LdapError.new("no start_tls result") if pdu.nil?
-		if pdu.result_code.zero?
-			ctx = OpenSSL::SSL::SSLContext.new
-			@conn = OpenSSL::SSL::SSLSocket.new(@conn, ctx)
-			@conn.connect
-			@conn.sync_close = true
-		else
-			raise LdapError.new("start_tls failed: #{pdu.result_code}")
-		end
+        when :start_tls
+                raise LdapError.new("openssl unavailable") unless $net_ldap_openssl_available
+                msgid = next_msgid.to_ber
+                request = [StartTlsOid.to_ber].to_ber_appsequence( Net::LdapPdu::ExtendedRequest )
+                request_pkt = [msgid, request].to_ber_sequence
+                @conn.write request_pkt
+                be = @conn.read_ber(AsnSyntax)
+                raise LdapError.new("no start_tls result") if be.nil?
+                pdu = Net::LdapPdu.new(be)
+                raise LdapError.new("no start_tls result") if pdu.nil?
+                if pdu.result_code.zero?
+                        ctx = OpenSSL::SSL::SSLContext.new
+                        @conn = OpenSSL::SSL::SSLSocket.new(@conn, ctx)
+                        @conn.connect
+                        @conn.sync_close = true
+                else
+                        raise LdapError.new("start_tls failed: #{pdu.result_code}")
+                end
       else
         raise LdapError.new( "unsupported encryption method #{args[:method]}" )
       end
@@ -1443,7 +1443,7 @@ module Net
           search_filter.to_ber,
           search_attributes.to_ber_sequence
         ].to_ber_appsequence(3)
-  
+
         controls = [
           [
           LdapControls::PagedResults.to_ber,
@@ -1557,7 +1557,7 @@ module Net
       add_dn = args[:dn] or raise LdapError.new("Unable to add empty DN")
       add_attrs = []
       a = args[:attributes] and a.each {|k,v|
-        add_attrs << [ k.to_s.to_ber, v.to_a.map {|m| m.to_ber}.to_ber_set ].to_ber_sequence
+        add_attrs << [ k.to_s.to_ber, [v].flatten.map {|m| m.to_s.to_ber}.to_ber_set ].to_ber_sequence
       }
 
       request = [add_dn.to_ber, add_attrs.to_ber_sequence].to_ber_appsequence(8)
