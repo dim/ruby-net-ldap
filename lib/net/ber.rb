@@ -145,21 +145,21 @@ module Net
     # of this one.
     #
     def read_ber syntax=nil
-      # don't bother with this line, since IO#getc by definition returns nil on eof.
+      # don't bother with this line, since IO#getbyte by definition returns nil on eof.
       #return nil if eof?
 
-      id = getc or return nil  # don't trash this value, we'll use it later
+      id = getbyte or return nil  # don't trash this value, we'll use it later
       #tag = id & 31
       #tag < 31 or raise BerError.new( "unsupported tag encoding: #{id}" )
       #tagclass = TagClasses[ id >> 6 ]
       #encoding = (id & 0x20 != 0) ? :constructed : :primitive
 
-      n = getc
+      n = getbyte
       lengthlength,contentlength = if n <= 127
         [1,n]
       else
         # Replaced the inject because it profiles hot.
-        #j = (0...(n & 127)).inject(0) {|mem,x| mem = (mem << 8) + getc}
+        #j = (0...(n & 127)).inject(0) {|mem,x| mem = (mem << 8) + getbyte}
         j = 0
         read( n & 127 ).each_byte {|n1| j = (j << 8) + n1}
         [1 + (n & 127), j]
@@ -546,7 +546,8 @@ class Array
 
   private
   def to_ber_seq_internal code
-    s = self.to_s
+    s = ''
+    self.each{|x| s = s + x}
     [code].pack('C') + s.length.to_ber_length_encoding + s
   end
 
