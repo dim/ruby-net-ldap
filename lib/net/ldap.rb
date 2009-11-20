@@ -1291,7 +1291,7 @@ module Net
       raise LdapError.new( "invalid binding information" ) unless (user && psw)
 
       msgid = next_msgid.to_ber
-      request = [LdapVersion.to_ber, user.to_ber, psw.to_ber_contextspecific(0)].to_ber_appsequence(0)
+      request = [LdapVersion.to_ber, user.to_s.to_ber, psw.to_ber_contextspecific(0)].to_ber_appsequence(0)
       request_pkt = [msgid, request].to_ber_sequence
       @conn.write request_pkt
 
