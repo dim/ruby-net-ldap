@@ -126,7 +126,7 @@ class Filter
     when :ne
       "(!(#{@left}=#{@right}))"
     when :eq
-      "(#{@left}=#{@right})"
+      "#{@left}=#{@right}"
     #when :gt
      # "#{@left}>#{@right}"
     #when :lt
