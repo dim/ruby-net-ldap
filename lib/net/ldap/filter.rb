@@ -238,10 +238,10 @@ class Filter
       end
       type, dn, rule = $1, $2, $4
 
-      seq << rule.to_ber_contextspecific(1) unless rule.blank? # matchingRule
-      seq << type.to_ber_contextspecific(2) unless type.blank? # type
+      seq << rule.to_ber_contextspecific(1) unless rule.to_s.empty? # matchingRule
+      seq << type.to_ber_contextspecific(2) unless type.to_s.empty? # type
       seq << unescape(@right).to_ber_contextspecific(3) # matchingValue
-      seq << "1".to_ber_contextspecific(4) unless dn.blank? # dnAttributes
+      seq << "1".to_ber_contextspecific(4) unless dn.to_s.empty? # dnAttributes
 
       seq.to_ber_contextspecific 9
     when :ge
