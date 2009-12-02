@@ -80,6 +80,7 @@ class Filter
   #
   def Filter::eq attribute, value; Filter.new :eq, attribute, value; end
   def Filter::ne attribute, value; Filter.new :ne, attribute, value; end
+  def Filter::ex attribute, value; Filter.new :ex, attribute, value; end
   #def Filter::gt attribute, value; Filter.new :gt, attribute, value; end
   #def Filter::lt attribute, value; Filter.new :lt, attribute, value; end
   def Filter::ge attribute, value; Filter.new :ge, attribute, value; end
@@ -127,6 +128,8 @@ class Filter
       "(!(#{@left}=#{@right}))"
     when :eq
       "#{@left}=#{@right}"
+   when :ex
+      "#{@left}:=#{@right}"
     #when :gt
      # "#{@left}>#{@right}"
     #when :lt
@@ -151,18 +154,19 @@ class Filter
   # to_ber
   # Filter ::=
   #     CHOICE {
-  #         and            [0] SET OF Filter,
-  #         or             [1] SET OF Filter,
-  #         not            [2] Filter,
-  #         equalityMatch  [3] AttributeValueAssertion,
-  #         substrings     [4] SubstringFilter,
-  #         greaterOrEqual [5] AttributeValueAssertion,
-  #         lessOrEqual    [6] AttributeValueAssertion,
-  #         present        [7] AttributeType,
-  #         approxMatch    [8] AttributeValueAssertion
+  #         and             [0] SET OF Filter,
+  #         or              [1] SET OF Filter,
+  #         not             [2] Filter,
+  #         equalityMatch   [3] AttributeValueAssertion,
+  #         substrings      [4] SubstringFilter,
+  #         greaterOrEqual  [5] AttributeValueAssertion,
+  #         lessOrEqual     [6] AttributeValueAssertion,
+  #         present         [7] AttributeType,
+  #         approxMatch     [8] AttributeValueAssertion,
+  #         extensibleMatch [9] MatchingRuleAssertion
   #     }
   #
-  # SubstringFilter
+  # SubstringFilter ::=
   #     SEQUENCE {
   #         type               AttributeType,
   #         SEQUENCE OF CHOICE {
@@ -171,6 +175,22 @@ class Filter
   #             final          [2] LDAPString
   #         }
   #     }
+  #
+  # MatchingRuleAssertion ::=
+  #     SEQUENCE {
+  #       matchingRule    [1] MatchingRuleId OPTIONAL,
+  #       type            [2] AttributeDescription OPTIONAL,
+  #       matchValue      [3] AssertionValue,
+  #       dnAttributes    [4] BOOLEAN DEFAULT FALSE
+  #     }
+  #     
+  # Matching Rule Suffixes
+  #     Less than	 [.1] or .[lt]
+  #     Less than or equal to	[.2] or [.lte]
+  #     Equality	[.3] or	[.eq] (default)
+  #     Greater than or equal to	[.4] or [.gte]
+  #     Greater than	[.5] or [.gt]
+  #     Substring	[.6] or	[.sub]
   #
   # Parsing substrings is a little tricky.
   # We use the split method to break a string into substrings
@@ -210,6 +230,20 @@ class Filter
       else                      #equality
         [@left.to_s.to_ber, unescape(@right).to_ber].to_ber_contextspecific 3
       end
+    when :ex
+      seq = []
+
+      unless @left =~ /^([-;\d\w]*)(:dn)?(:(\w+|[.\d\w]+))?$/
+        raise "Bad attribute #{@left}"
+      end
+      type, dn, rule = $1, $2, $4
+
+      seq << rule.to_ber_contextspecific(1) unless rule.blank? # matchingRule
+      seq << type.to_ber_contextspecific(2) unless type.blank? # type
+      seq << unescape(@right).to_ber_contextspecific(3) # matchingValue
+      seq << "1".to_ber_contextspecific(4) unless dn.blank? # dnAttributes
+
+      seq.to_ber_contextspecific 9
     when :ge
       [@left.to_s.to_ber, unescape(@right).to_ber].to_ber_contextspecific 5
     when :le
@@ -321,7 +355,7 @@ class Filter
 				yield :substrings, @left, @right
 			else
 				yield :equalityMatch, @left, @right
-			end
+			end    
 		when :ge
 			yield :greaterOrEqual, @left, @right
 		when :le
@@ -467,16 +501,16 @@ class FilterParser #:nodoc:
   # Added blanks to the attribute filter (26Oct06)
   def parse_filter_branch scanner
     scanner.scan(/\s*/)
-    if token = scanner.scan( /[\w\-_]+/ )
+    if token = scanner.scan( /[\d\w\-_\:\.]*[\d\w]/ )
       scanner.scan(/\s*/)
-      if op = scanner.scan( /\=|\<\=|\<|\>\=|\>|\!\=/ )
+      if op = scanner.scan( /\=|\:\=|\<\=|\<|\>\=|\>|\!\=/ )
         scanner.scan(/\s*/)
-        #if value = scanner.scan( /[\w\*\.]+/ ) (ORG)
-        #if value = scanner.scan( /[\w\*\.\+\-@=#\$%&! ]+/ ) (ff suggested by Kouhei Sutou
-	if value = scanner.scan( /(?:[\w\*\.\+\-@=,#\$%&! ]|\\[a-fA-F\d]{2,2})+/ )
+        if value = scanner.scan( /(?:[\w\*\.\+\-@=,#\$%&! ]|\\[a-fA-F\d]{2,2})+/ )
           case op
           when "="
             Filter.eq( token, value )
+          when ":="
+            Filter.ex( token, value )
           when "!="
             Filter.ne( token, value )
           when "<"
