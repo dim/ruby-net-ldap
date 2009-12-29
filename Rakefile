@@ -1,7 +1,5 @@
-# -*- ruby -*-
-
 require 'rubygems'
-require 'hoe'
+require 'rake/testtask'
 
 # Add 'lib' to load path.
 $LOAD_PATH.unshift( "#{File.dirname(__FILE__)}/lib" )
@@ -9,10 +7,11 @@ $LOAD_PATH.unshift( "#{File.dirname(__FILE__)}/lib" )
 # Pull in local 'net/ldap' as opposed to an installed version.
 require 'net/ldap'
 
-Hoe.new('ruby-net-ldap', Net::LDAP::VERSION) do |p|
-  p.developer('Francis Cianfrocca', 'garbagecat10@gmail.com')
-  p.developer('Emiel van de Laar', 'gemiel@gmail.com')
-  p.developer('Dimitrij Denissenko', 'contact@dvisionfactory.com')
+ 
+task :default => :test
+ 
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/**/test*.rb']
+  t.verbose = true
 end
-
-# vim: syntax=Ruby

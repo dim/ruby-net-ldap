@@ -104,6 +104,11 @@ module Net
     out
   end
 
+  def self.ord(value)
+    value = value.ord if value.respond_to?(:ord)
+    value
+  end
+
   # This module is for mixing into IO and IO-like objects.
   module BERParser
 
@@ -242,12 +247,9 @@ module Net
     # Observe that weirdly we recursively call the original #read_ber in here.
     # That needs to be fixed if we ever obsolete the original method in favor of this one.
     def read_ber_from_string str, syntax=nil
-      id = str[0] || return
-      id = id.ord if RUBY_VERSION.to_f >= 1.9
+      id = Net::BER.ord(str[0]) || return
+      n  = Net::BER.ord(str[1]) || return
 
-      n = str[1] || return
-      n = n.ord if RUBY_VERSION.to_f >= 1.9
-      
       n_consumed = 2
       lengthlength,contentlength = if n <= 127
           [1,n]
