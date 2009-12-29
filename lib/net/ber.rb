@@ -104,11 +104,6 @@ module Net
     out
   end
 
-  def self.ord(value)
-    value = value.ord if value.respond_to?(:ord)
-    value
-  end
-
   # This module is for mixing into IO and IO-like objects.
   module BERParser
 
@@ -151,21 +146,21 @@ module Net
     # of this one.
     #
     def read_ber syntax=nil
-      # don't bother with this line, since IO#getc by definition returns nil on eof.
+      # don't bother with this line, since IO#getbyte by definition returns nil on eof.
       #return nil if eof?
 
-      id = BER.ord(getc) or return nil  # don't trash this value, we'll use it later
+      id = getbyte or return nil  # don't trash this value, we'll use it later
       #tag = id & 31
       #tag < 31 or raise BerError.new( "unsupported tag encoding: #{id}" )
       #tagclass = TagClasses[ id >> 6 ]
       #encoding = (id & 0x20 != 0) ? :constructed : :primitive
 
-      n = BER.ord(getc)
+      n = getbyte
       lengthlength,contentlength = if n <= 127
         [1,n]
       else
         # Replaced the inject because it profiles hot.
-        #j = (0...(n & 127)).inject(0) {|mem,x| mem = (mem << 8) + getc}
+        #j = (0...(n & 127)).inject(0) {|mem,x| mem = (mem << 8) + getbyte}
         j = 0
         read( n & 127 ).each_byte {|n1| j = (j << 8) + n1}
         [1 + (n & 127), j]
